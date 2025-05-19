@@ -25,7 +25,8 @@ export default function AccountPage() {
       setProfile(prev => ({
         ...prev,
         firstName: user.firstName || user.name?.split(' ')[0] || '',
-        lastName: user.lastName || (user.name?.split(' ').length > 1 ? user.name?.split(' ')[1] : '') || '',
+        // lastName: user.lastName || (user.name?.split(' ').length > 1 ? user.name?.split(' ')[1] : '') || '',
+        lastName: '',
         email: user.email || ''
       }));
     }
