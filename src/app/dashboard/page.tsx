@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
+
 import OverviewCards from '@/components/dashboard/OverviewCards';
 import SalesChart from '@/components/dashboard/SalesChart';
 import PerformanceMetrics from '@/components/dashboard/PerformanceMetrics';
@@ -16,7 +16,7 @@ export default function Dashboard() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
+      
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
