@@ -1,22 +1,48 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
-
+import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import OverviewCards from '@/components/dashboard/OverviewCards';
 import SalesChart from '@/components/dashboard/SalesChart';
 import PerformanceMetrics from '@/components/dashboard/PerformanceMetrics';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import CustomerInsights from '@/components/dashboard/CustomerInsights';
 import ProductPerformance from '@/components/dashboard/ProductPerformance';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Dashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+  
+  // Extra protection for the dashboard page
+  useEffect(() => {
+    // Only redirect after loading is complete and we know user is not authenticated
+    if (!isLoading && !user) {
+      console.log('Dashboard: User not authenticated, redirecting to login');
+      router.push('/login');
+    }
+  }, [user, isLoading, router]);
 
+  // Show loading state while checking authentication
+  if (isLoading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-gray-100">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary-600 mx-auto"></div>
+          <p className="mt-4 text-secondary-600">Loading dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // If not loading and user exists, show dashboard
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      
+      <DashboardSidebar isOpen={sidebarOpen} setIsOpen={setSidebarOpen} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">

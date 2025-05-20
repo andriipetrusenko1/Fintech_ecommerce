@@ -39,6 +39,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (storedUser) {
         try {
           const parsedUser = JSON.parse(storedUser);
+          console.log('Found stored user:', parsedUser.email);
+          
+          // Ensure the user object has the isLoggedIn property set to true
+          if (!parsedUser.isLoggedIn) {
+            parsedUser.isLoggedIn = true;
+          }
+          
           setUser(parsedUser);
         } catch (error) {
           console.error('Error parsing stored user:', error);
@@ -46,30 +53,56 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           localStorage.removeItem('user');
           sessionStorage.removeItem('user');
         }
+      } else {
+        console.log('No stored user found');
       }
       
-      setIsLoading(false);
+      // Set loading to false after a short delay to ensure state updates
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 100);
     };
     
     checkUserSession();
   }, []);
 
   // Redirect unauthenticated users away from protected routes
-  useEffect(() => {
-    if (!isLoading) {
-      const protectedRoutes = ['/dashboard', '/account', '/settings'];
-      const authRoutes = ['/login', '/register', '/forgot-password'];
+  // useEffect(() => {
+  //   if (!isLoading) {
+  //     const protectedRoutes = ['/dashboard', '/account', '/settings'];
+  //     const authRoutes = ['/login', '/register', '/forgot-password'];
       
-      if (protectedRoutes.some(route => pathname?.startsWith(route)) && !user) {
-        // Redirect to login if trying to access protected route while not logged in
-        router.push('/login');
-      } else if (authRoutes.includes(pathname || '') && user) {
-        // Redirect to dashboard if trying to access auth routes while logged in
-        router.push('/dashboard');
-      }
+  //     if (protectedRoutes.some(route => pathname?.startsWith(route)) && !user) {
+  //       // Redirect to login if trying to access protected route while not logged in
+  //       router.push('/login');
+  //     } else if (authRoutes.includes(pathname || '') && user) {
+  //       // Redirect to dashboard if trying to access auth routes while logged in
+  //       router.push('/dashboard');
+  //     }
+  //   }
+  // }, [user, isLoading, pathname, router]);
+  useEffect(() => {
+    if (isLoading) return;
+    
+    // Store the current path to avoid issues with pathname changing during the effect
+    const currentPath = pathname || '';
+    const protectedRoutes = ['/dashboard', '/account', '/settings'];
+    const authRoutes = ['/login', '/register', '/forgot-password'];
+    
+    // Create a flag to track if we've already redirected to prevent loops
+    let hasRedirected = false;
+    
+    // Only redirect if we haven't already redirected in this effect
+    if (!user && protectedRoutes.some(route => currentPath.startsWith(route)) && !hasRedirected) {
+      hasRedirected = true;
+      console.log('Redirecting to login: Protected route accessed without authentication');
+      router.push('/login');
+    } else if (user && authRoutes.includes(currentPath) && !hasRedirected) {
+      hasRedirected = true;
+      console.log('Redirecting to dashboard: Auth route accessed while authenticated');
+      router.push('/dashboard');
     }
   }, [user, isLoading, pathname, router]);
-
   // Login function
   const login = async (email: string, password: string, rememberMe: boolean) => {
     setIsLoading(true);
@@ -92,21 +125,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         sessionStorage.setItem('user', JSON.stringify(newUser));
       }
       
-      // Update state
+      // First update the user state
       setUser(newUser);
       
-      // Redirect to dashboard
-      router.push('/dashboard');
+      // Wait a moment to ensure state is updated before navigation
+      setTimeout(() => {
+        // Then redirect to dashboard
+        console.log('Login successful, redirecting to dashboard');
+        router.push('/dashboard');
+        setIsLoading(false);
+      }, 100);
+      
     } catch (error) {
       console.error('Login error:', error);
-      throw new Error('Invalid email or password');
-    } finally {
       setIsLoading(false);
+      throw new Error('Invalid email or password');
     }
   };
 
   // Logout function
   const logout = () => {
+    console.log('Logging out user');
+    
     // Clear storage
     localStorage.removeItem('user');
     sessionStorage.removeItem('user');
@@ -114,8 +154,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Update state
     setUser(null);
     
-    // Redirect to home
-    router.push('/');
+    // Redirect to home after a short delay to ensure state is updated
+    setTimeout(() => {
+      console.log('Redirecting to home after logout');
+      router.push('/');
+    }, 100);
   };
 
   // Context value

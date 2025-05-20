@@ -9,7 +9,7 @@ import UserProfileDropdown from '@/components/UserProfileDropdown';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, logout } = useAuth();
 
   return (
     <header className="bg-white shadow-sm sticky top-0 z-50">
@@ -143,7 +143,8 @@ export default function Header() {
                   </Link>
                   <button 
                     onClick={() => {
-                      const { logout } = useAuth();
+                      // Correctly access the logout function from the existing useAuth() call
+                      // at the top of the component
                       logout();
                     }}
                     className="w-full text-left block px-3 py-2 rounded-md text-base font-medium text-secondary-600 hover:text-primary-600 hover:bg-gray-100"

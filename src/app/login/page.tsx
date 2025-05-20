@@ -5,9 +5,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaEnvelope, FaLock, FaGoogle, FaApple, FaLinkedin, FaEye, FaEyeSlash } from 'react-icons/fa';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   
   // Form state
   const [email, setEmail] = useState('');
@@ -36,37 +38,36 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      // In a real application, you would make an API call to authenticate the user
-      // For this demo, we'll simulate a successful login after a delay
-      setTimeout(() => {
-        // Store user info in localStorage or sessionStorage
-        const user = {
-          email,
-          name: email.split('@')[0], // Just for demo purposes
-          isLoggedIn: true
-        };
-        
-        if (rememberMe) {
-          localStorage.setItem('user', JSON.stringify(user));
-        } else {
-          sessionStorage.setItem('user', JSON.stringify(user));
-        }
-        
-        // Redirect to dashboard
-        router.push('/dashboard');
-      }, 1500);
+      // Use the AuthContext login function
+      await login(email, password, rememberMe);
+      // The login function will handle the redirect to dashboard
     } catch (err) {
       console.error('Login error:', err);
-      setError('Invalid email or password');      
-    }finally {
+      setError('Invalid email or password');
       setIsLoading(false);
     }
   };
   
   // Demo login credentials
-  const handleDemoLogin = () => {
-    setEmail('demo@example.com');
-    setPassword('password123');
+  const handleDemoLogin = async () => {
+    const demoEmail = 'demo@example.com';
+    const demoPassword = 'password123';
+    
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    
+    // Optionally auto-login with demo credentials
+    // Uncomment the following lines to enable auto-login
+    /*
+    try {
+      setIsLoading(true);
+      await login(demoEmail, demoPassword, true);
+    } catch (err) {
+      console.error('Demo login error:', err);
+      setError('Failed to login with demo credentials');
+      setIsLoading(false);
+    }
+    */
   };
 
   return (
