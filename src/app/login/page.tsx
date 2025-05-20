@@ -57,7 +57,8 @@ export default function LoginPage() {
       }, 1500);
     } catch (err) {
       console.error('Login error:', err);
-      setError('Invalid email or password');
+      setError('Invalid email or password');      
+    }finally {
       setIsLoading(false);
     }
   };
